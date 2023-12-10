@@ -1,0 +1,24 @@
+import pandas as pd
+
+# Prepare an input in .xlsx how it described in ReadMe
+data = pd.read_excel("YOUR_LOCATION", sheet_name="Input for Interpolation")
+
+# Columns for interpolation
+columns_for_interpolation = data.columns[4:] # Assuming the first 4 columns are metadata
+
+# Iterate through the interpolation process
+  for _ in range(1000):
+  # Impute missing values using linear interpolation
+  current_imputed = data[columns_for_interpolation].interpolate(method='linear', axis=1)
+
+  # Calculate the mean of each year
+  mean_annual = current_imputed.groupby(data['Proxy.Year']).transform('mean')
+
+  # Fill missing values in the original columns with mean values
+  data[columns_for_interpolation] = data[columns_for_interpolation].fillna(mean_annual)
+
+  # Optional: Fill any remaining missing values with 0
+  data.fillna(0, inplace=True)
+
+# Save output in .xlsx
+current_imputed.to_excel("YOUR_LOCATION", index=False)
