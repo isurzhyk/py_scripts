@@ -1,24 +1,44 @@
 import pandas as pd
+from pathlib import Path
 
-# Prepare an input in .xlsx how it described in ReadMe
-data = pd.read_excel("YOUR_LOCATION", sheet_name="Input for Interpolation")
+# Function to perform linear interpolation
+def linear_interpolation(df):
+    return df.interpolate(method='linear', axis=0)
 
-# Columns for interpolation
-columns_for_interpolation = data.columns[4:] # Assuming the first 4 columns are metadata
+# Function to calculate mean annual values
+def calculate_mean_annual(df, numeric_columns):
+    df['Year'] = df['Proxy.Year'].dt.year
+    mean_annual = df.groupby('Year')[numeric_columns].transform('mean')
+    return mean_annual
 
-# Iterate through the interpolation process
-  for _ in range(1000):
-  # Impute missing values using linear interpolation
-  current_imputed = data[columns_for_interpolation].interpolate(method='linear', axis=1)
+# Prompt user to input the file path
+file_user = 'C:/Users/Admin/input_for_interpolation_test.xlsx'
+sheet_name = 'Data_Input'
 
-  # Calculate the mean of each year
-  mean_annual = current_imputed.groupby(data['Proxy.Year']).transform('mean')
+# Read the input data
+try:
+    data = pd.read_excel(file_user, sheet_name=sheet_name)
+except Exception as e:
+    print(f"Error reading Excel file: {e}")
+    raise e
 
-  # Fill missing values in the original columns with mean values
-  data[columns_for_interpolation] = data[columns_for_interpolation].fillna(mean_annual)
+# Perform interpolation and mean calculation for 1000 iterations
+num_iterations = 1000
+for i in range(num_iterations):
+    # Perform linear interpolation on numerical columns
+    data.iloc[:, 4:] = linear_interpolation(data.iloc[:, 4:])
+    
+    # Calculate mean annual values
+    mean_annual = calculate_mean_annual(data, data.columns[4:])
+    
+    # Adjust data based on mean annual values
+    data.iloc[:, 4:] = data.iloc[:, 4:] - mean_annual + data.iloc[:, 4:].mean()
 
-  # Optional: Fill any remaining missing values with 0
-  data.fillna(0, inplace=True)
-
-# Save output in .xlsx
-current_imputed.to_excel("YOUR_LOCATION", index=False)
+# Save the final imputed data to Excel
+output_file_name = "Out.xlsx"
+try:
+    data.to_excel(output_file_name, index=False)
+    print(f"Output saved to {output_file_name}")
+except Exception as e:
+    print(f"Error saving Excel file: {e}")
+    raise e
