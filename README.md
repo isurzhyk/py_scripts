@@ -1,4 +1,4 @@
-# py_scripts
+# py_linear_interpolation
 A simple script for linear interpolation.
 
 Input for interpolation script should be in such a format:
