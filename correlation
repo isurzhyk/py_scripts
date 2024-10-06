@@ -1,0 +1,11 @@
+import pandas as pd
+
+# Sample data
+
+data = {'x': [2, 4, 8, 16, 32], 'y': [12, 24, 36, 48, 60]}
+df = pd.DataFrame(data)
+
+# Calculate Pearson correlation
+  
+pearson_corr = df['x'].corr(df['y'])
+print(f"Pearson correlation: {pearson_corr}")
